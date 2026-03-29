@@ -1,0 +1,9 @@
+pyyaml
+pydantic
+pytest
+pandas
+mutpy
+radon
+unidiff
+requests
+tqdm

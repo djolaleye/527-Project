@@ -1,0 +1,14 @@
+.venv
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+.claude/
+defects4j-repo/
+bugsinpy-repo/
+*.log
+results/
+*.csv
+*.json
