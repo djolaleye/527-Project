@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="maven-antrun-" default="main"  >
+<target name="main">
+  <jar destfile="target/commons-codec-cli-1.11-SNAPSHOT.jar">
+    <metainf includes="NOTICE.txt,LICENSE.txt" dir="C:\Users\Deji\Class\CS 527\Project\527-Project\defects4j-subset\Codec-18f"/>
+    <manifest>
+      <attribute name="Extension-Name" value="org.apache.commons.net"/>
+      <attribute name="Specification-Title" value="Apache Commons Codec"/>
+      <attribute name="Implementation-Title" value="Apache Commons Codec"/>
+      <attribute name="Implementation-Vendor" value="The Apache Software Foundation"/>
+      <attribute name="Implementation-Version" value="1.11-SNAPSHOT"/>
+      <attribute name="Implementation-Vendor-Id" value="org.apache"/>
+      <attribute name="Implementation-Build" value="${scmBranch}@r${buildNumber}; 2026-03-29 23:50:37+0000"/>
+      <attribute name="X-Compile-Source-JDK" value="1.8"/>
+      <attribute name="X-Compile-Target-JDK" value="1.8"/>
+      <attribute name="Main-Class" value="org.apache.commons.codec.cli.Digest"/>
+    </manifest>
+    <fileset includes="org/apache/commons/codec/cli/**" dir="target/classes"/>
+    <fileset includes="org/apache/commons/codec/BinaryDecoder.class" dir="target/classes"/>
+    <fileset includes="org/apache/commons/codec/BinaryEncoder.class" dir="target/classes"/>
+    <fileset includes="org/apache/commons/codec/Charsets.class" dir="target/classes"/>
+    <fileset includes="org/apache/commons/codec/Decoder.class" dir="target/classes"/>
+    <fileset includes="org/apache/commons/codec/DecoderException.class" dir="target/classes"/>
+    <fileset includes="org/apache/commons/codec/Encoder.class" dir="target/classes"/>
+    <fileset includes="org/apache/commons/codec/EncoderException.class" dir="target/classes"/>
+    <fileset includes="org/apache/commons/codec/binary/Hex.class" dir="target/classes"/>
+    <fileset includes="org/apache/commons/codec/digest/DigestUtils.class" dir="target/classes"/>
+    <fileset includes="org/apache/commons/codec/digest/MessageDigestAlgorithms.class" dir="target/classes"/>
+  </jar>
+</target>
+</project>

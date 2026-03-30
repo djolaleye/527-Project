@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="maven-antrun-" default="main"  >
+<target name="main">
+  <copy todir="C:\Users\Deji\Class\CS 527\Project\527-Project\defects4j-subset\Collections-28f\target/apidocs/META-INF">
+    <fileset dir="C:\Users\Deji\Class\CS 527\Project\527-Project\defects4j-subset\Collections-28f">
+      <include name="LICENSE.txt"/>
+      <include name="NOTICE.txt"/>
+    </fileset>
+  </copy>
+</target>
+</project>
