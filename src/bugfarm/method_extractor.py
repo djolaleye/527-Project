@@ -4,7 +4,6 @@ import os
 import multiprocessing
 import argparse
 import sys
-import subprocess
 import glob
 import time
 from typing import Set, Tuple
@@ -58,7 +57,15 @@ def process_file(target_file):
         with open(f'{unique_name}.{index}.java', mode='w', encoding="ISO-8859-1", errors='ignore') as fw:
             fw.write(method_text)
 
-        os.system(f'tokenizer {unique_name}.{index}.java > {unique_name}.{index}.txt')
+        rc = os.system(f'tokenizer {unique_name}.{index}.java > {unique_name}.{index}.txt')
+        if rc != 0:
+            try:
+                os.remove(f'{unique_name}.{index}.txt')
+            except OSError:
+                pass
+            os.remove(f'{unique_name}.{index}.java')
+            continue
+
         tokens = tokenize(f'{unique_name}.{index}.txt')
 
         instance = {}
@@ -90,8 +97,18 @@ def main(args):
 
     counter = Counter()
 
-    files = subprocess.Popen(["ls"] + glob.glob(f'projects/{args.project_name}/**/src/main/java/**/*.java', recursive=True), stdout=subprocess.PIPE)
-    source_paths = [x.decode('ascii').strip() for x in files.stdout.readlines()]
+    source_paths = glob.glob(
+        f'projects/{args.project_name}/**/src/main/java/**/*.java',
+        recursive=True,
+    )
+
+    if not source_paths:
+        logging.warning(
+            f'no Java source files found under projects/{args.project_name}; '
+            f'skipping. Run setup.sh/checkout_projects.sh to populate projects/.'
+        )
+        sys.stderr.write(f'\nno source files for {args.project_name}, skipping\n')
+        return
 
     os.makedirs(f'data/{args.project_name}', exist_ok=True)
 

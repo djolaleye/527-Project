@@ -29,12 +29,7 @@ MODEL_NAME=$2
 MODEL_SIZE=$3
 GPU_ID=$4
 
-projects=(
-    "commons-cli" "commons-codec" "commons-collections" "commons-compress" "commons-csv"
-    "commons-jxpath" "commons-lang" "commons-math"
-    "gson" "jackson-core" "jackson-databind" "jackson-dataformat-xml"
-    "joda-time" "jsoup"
-)
+projects=("commons-cli" "commons-csv")
 
 for project in "${projects[@]}"; do
     python3 src/bugfarm/bug_selection.py \

@@ -5,15 +5,8 @@ import utils
 from json import loads
 import jsonlines
 
-projects = [
-    "commons-cli","commons-collections","commons-csv",
-    "commons-lang","gson","jackson-databind",
-    "jfreechart","jsoup","commons-codec",
-    "commons-compress","commons-jxpath","commons-math",
-    "jackson-core","jackson-dataformat-xml","joda-time"
-]
 
-def get_file(dir,saveDir,timeStamp):
+def get_file(dir, saveDir, timeStamp, projects):
 
     for project in projects:
         all = []
@@ -36,7 +29,7 @@ def get_file(dir,saveDir,timeStamp):
                     num += len(data)
                     id = 0
                     for item in data:
-                        new_item = { 
+                        new_item = {
                             "idss":item["idss"],"filename":item["filename"],
                             "old_line_num":item["line"], # line number selected in original code
                             "prob":item["prob"],
@@ -47,9 +40,10 @@ def get_file(dir,saveDir,timeStamp):
                         new_data.append(new_item)
 
                         # to get parsed mutants - syntactically correct
-                        
+
                         original_sets = utils.read_java(new_item["filename"])
-                        mutated_sets = utils.parse_java_func_intervals(new_item["mutated"],new_item["filename"])
+                        mutated_file = item["precode"] + item["code"] + "\n" + item["aftercode"].lstrip("\n")
+                        mutated_sets = utils.parse_java_func_intervals(mutated_file, new_item["filename"])
 
                         if len(mutated_sets) == 0:
                             unparsed_mutants.append(new_item)
@@ -101,14 +95,14 @@ def get_file(dir,saveDir,timeStamp):
                 parsed_mutants_file.close()
                 with open(parsed_mutants_saveTo, "a") as pmfile:
                     json.dump(parsed_mutants, pmfile)
-            
+
             if len(unparsed_mutants) > 0:
                 unparsed_mutants_saveTo = os.path.join(saveDir,timeStamp + "_" + project + "_unparsed_mutants.json")
                 unparsed_mutants_file = open(unparsed_mutants_saveTo,"w+")
                 unparsed_mutants_file.close()
                 with open(unparsed_mutants_saveTo, "a") as umfile:
                     json.dump(unparsed_mutants, umfile)
-            
+
             if len(final_mutants) > 0:
                 final_mutants_saveTo = os.path.join(saveDir,timeStamp + "_" + project + "_final_mutants.jsonl")
                 final_mutants_file = open(final_mutants_saveTo,"w+")
@@ -123,4 +117,6 @@ if __name__ == "__main__":
     mutant_dir = args[0]
     saveto_dir = args[1]
     timeStamp = args[2]
-    get_file(mutant_dir,saveto_dir,timeStamp)
+    projects_dir = args[3] if len(args) > 3 else "/app/projects"
+    projects = utils.discover_projects(projects_dir)
+    get_file(mutant_dir, saveto_dir, timeStamp, projects)

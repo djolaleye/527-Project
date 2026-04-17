@@ -29,15 +29,9 @@ function install_requirements() {
         git+https://github.com/jose/javalang.git@start_position_and_end_position
 
     echo "=== Setting up source-code-tokenizer ==="
-    if [ ! -d "$SCRIPT_DIR/source-code-tokenizer" ]; then
-        git clone https://github.com/devreplay/source-code-tokenizer.git \
-            "$SCRIPT_DIR/source-code-tokenizer"
-    fi
-    
-    cd "$SCRIPT_DIR/source-code-tokenizer"
-    npm install
-    npm link
-    cd "$SCRIPT_DIR"
+    # Install the published npm package globally — it ships prebuilt lib/.
+    # The GitHub clone is source-only and has no build script / tsconfig.
+    npm install -g source-code-tokenizer
 
     echo "Requirements installation completed."
 }
@@ -53,7 +47,7 @@ function build_projects() {
     local main="$SCRIPT_DIR"
 
     # These projects require Java 8 (compilation fails under Java 11+)
-    local java8_projects=("commons-lang" "joda-time")
+    local java8_projects=()
 
     for project_path in "$SCRIPT_DIR"/projects/*/; do
         local project_name
