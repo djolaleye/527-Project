@@ -31,19 +31,7 @@ err()  { echo "[error]    $*" >&2; }
 # the mapping; keys are the defects4j project identifiers (case-sensitive).
 declare -A D4J_NAMES=(
   ["Cli"]="commons-cli"
-  ["Codec"]="commons-codec"
-  ["Collections"]="commons-collections"
-  ["Compress"]="commons-compress"
   ["Csv"]="commons-csv"
-  ["Gson"]="gson"
-  ["JacksonCore"]="jackson-core"
-  ["JacksonDatabind"]="jackson-databind"
-  ["JacksonXml"]="jackson-dataformat-xml"
-  ["Jsoup"]="jsoup"
-  ["JxPath"]="commons-jxpath"
-  ["Lang"]="commons-lang"
-  ["Math"]="commons-math"
-  ["Time"]="joda-time"
 )
 
 # ── Defects4J checkouts ───────────────────────────────────────────────────────
@@ -53,35 +41,32 @@ declare -A D4J_NAMES=(
 
 log "=== Defects4J (Java) ==="
 
-if ! command -v defects4j &>/dev/null; then
-  err "'defects4j' not found on PATH – skipping Java checkouts."
-else
-  for entry in "$D4J_SUBSET"/*/; do
-    dir_name="$(basename "$entry")"
+# defects4j-subset/ already contains pre-checked-out fixed-version sources
+# for each bug, so we copy them directly rather than invoking `defects4j`.
+for entry in "$D4J_SUBSET"/*/; do
+  dir_name="$(basename "$entry")"
 
-    # Parse: strip trailing 'f', split on last '-'
-    without_f="${dir_name%f}"                   # e.g. Cli-40
-    d4j_project="${without_f%-*}"               # e.g. Cli
-    bug_id="${without_f##*-}"                   # e.g. 40
-    version="${bug_id}f"                        # e.g. 40f
+  # Parse: strip trailing 'f', split on last '-'
+  without_f="${dir_name%f}"                   # e.g. Cli-40
+  d4j_project="${without_f%-*}"               # e.g. Cli
+  bug_id="${without_f##*-}"                   # e.g. 40
 
-    canonical="${D4J_NAMES[$d4j_project]-}"
-    if [[ -z "$canonical" ]]; then
-      err "No canonical name for Defects4J project '$d4j_project' – skipping $dir_name"
-      continue
-    fi
+  canonical="${D4J_NAMES[$d4j_project]-}"
+  if [[ -z "$canonical" ]]; then
+    err "No canonical name for Defects4J project '$d4j_project' – skipping $dir_name"
+    continue
+  fi
 
-    target="$PROJECTS_DIR/$canonical"
+  target="$PROJECTS_DIR/$canonical"
 
-    if [[ -d "$target" ]]; then
-      skip "$canonical already exists at $target"
-      continue
-    fi
+  if [[ -d "$target" ]]; then
+    skip "$canonical already exists at $target"
+    continue
+  fi
 
-    log "Checking out $d4j_project bug $bug_id (fixed) → $target"
-    defects4j checkout -p "$d4j_project" -v "$version" -w "$target"
-  done
-fi
+  log "Copying $d4j_project bug $bug_id (fixed) → $target"
+  cp -a "$entry" "$target"
+done
 
 # ── BugsInPy checkouts ────────────────────────────────────────────────────────
 # Each project in bugsinpy-subset/projects/ may have multiple bug IDs under

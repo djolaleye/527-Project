@@ -3,7 +3,7 @@ import ast
 import time
 import argparse
 from tqdm import tqdm
-import openai
+from openai import OpenAI, BadRequestError, APITimeoutError, APIConnectionError, APIError
 
 
 def main(args):
@@ -12,10 +12,10 @@ def main(args):
     with open('configs/configs.json', 'r') as f:
         config = json.load(f)
 
-    openai.api_key = config['openai_api_key']
+    client = OpenAI(api_key=config['openai_api_key'])
 
     lines = []
-    with open(f'data/{args.project_name}/unique_methods.jsonl', 'r') as f:
+    with open(f'data/{args.project_name}/unique_methods_{args.model_type}-{args.model_size}_las_lat.jsonl', 'r') as f:
         lines = f.readlines()
 
     json_file = open(f'data/{args.project_name}/unique_methods_{args.model_type}-{args.model_size}_chatgpt.jsonl', 'a')
@@ -74,15 +74,13 @@ def main(args):
             prompt =  """Observe the following java method where each statement has a specific ID starting from 0. Can you produce 3 different buggy versions of this method by changing {} only? Do not change other statements in the given java code.\n\nYou have to write each buggy method again. Do not write anything else in your response. Make sure your generated buggy java code is compilable and does not have syntax errors and compile-time errors. Do not use a variable which does not exist in the scope of the given method. You should put <start1> <start2> <start3> and <end1> <end2> <end3> in the beginning and end of each buggy method so I could parse your response later.\n\n{}""".format(change_statements_str, '\n'.join(index_code))
 
         try:
-            response = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[{"role": "user", "content": prompt}])
+            response = client.chat.completions.create(model="gpt-3.5-turbo", messages=[{"role": "user", "content": prompt}])
             dct['chatgpt_response'] = response.choices[0].message.content
-        except openai.error.InvalidRequestError as e:
+        except BadRequestError as e:
             dct['chatgpt_response'] = f'Token size exceeded. {e}'
-        except openai.error.Timeout as e:
+        except (APITimeoutError, APIConnectionError):
             continue
-        except openai.error.ServiceUnavailableError as e:
-            continue
-        except openai.error.APIError as e:
+        except APIError:
             continue
 
         dct['duration'] = time.time() - start_time

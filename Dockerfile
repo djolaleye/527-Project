@@ -14,6 +14,7 @@ RUN apt-get update && apt-get install -y \
         python3 python3-dev python3-pip \
         openjdk-8-jdk \
         openjdk-11-jdk \
+        nodejs npm \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 RUN cpanm --notest String::Interpolate
@@ -24,9 +25,9 @@ RUN wget -q https://archive.apache.org/dist/maven/maven-3/3.6.3/binaries/apache-
     && ln -s /opt/apache-maven-3.6.3 /opt/maven \
     && rm /tmp/apache-maven-3.6.3-bin.tar.gz
 
-ENV M2_HOME=/opt/maven \
-    MAVEN_HOME=/opt/maven \
-    PATH=/opt/maven/bin:${PATH}
+ENV M2_HOME=/opt/maven 
+ENV MAVEN_HOME=/opt/maven 
+ENV PATH=${M2_HOME}/bin:${PATH}
 
 # ── 3. Java version management ───────────────────────────────────────────────
 RUN update-alternatives --install /usr/bin/java  java  /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java  1080 \
@@ -36,9 +37,9 @@ RUN update-alternatives --install /usr/bin/java  java  /usr/lib/jvm/java-8-openj
     && update-alternatives --set java  /usr/lib/jvm/java-11-openjdk-amd64/bin/java \
     && update-alternatives --set javac /usr/lib/jvm/java-11-openjdk-amd64/bin/javac
 
-ENV JAVA_8_HOME=/usr/lib/jvm/java-8-openjdk-amd64 \
-    JAVA_11_HOME=/usr/lib/jvm/java-11-openjdk-amd64 \
-    JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+ENV JAVA_8_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+ENV JAVA_11_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
 
 # Helper scripts to switch Java versions inside build scripts
 RUN printf '#!/bin/bash\nupdate-alternatives --set java  "$JAVA_8_HOME/jre/bin/java"\nupdate-alternatives --set javac "$JAVA_8_HOME/bin/javac"\nexport JAVA_HOME=$JAVA_8_HOME\n'  > /usr/local/bin/use_java8  \
@@ -54,62 +55,32 @@ RUN cpanm --quiet --notest \
         XML::Simple \
         XML::Parser \
         Storable
+# requirements.txt first — changes rarely, good cache layer
+COPY requirements.txt .
+COPY . /app
 
-RUN git clone --depth 1 https://github.com/rjust/defects4j.git /opt/defects4j \
-    && cd /opt/defects4j && ./init.sh
+# Expose bugsinpy CLI tools (bugsinpy-checkout, etc.) on PATH
+ENV PATH=/app/bugsinpy-repo/framework/bin:${PATH}
+RUN find /app/bugsinpy-repo/framework/bin -type f -exec chmod +x {} + \
+    && find /app/bugsinpy-repo/framework -type f \( -name '*.sh' -o -name 'bugsinpy-*' \) \
+        -exec dos2unix {} +
 
-ENV D4J_HOME=/opt/defects4j 
-ENV PATH="/opt/defects4j/framework/bin:${PATH}"
-
-# ── 5. BugsInPy (from local repo) ────────────────────────────────────────────
-# Copy the framework AND the projects metadata database
-COPY bugsinpy-repo/framework /opt/bugsinpy/framework
-COPY bugsinpy-repo/projects /opt/bugsinpy/projects
-
-# Normalise line-endings and mark executable (handles Windows-checked-out repos)
-RUN find /opt/bugsinpy/framework/bin -type f -exec dos2unix {} \; \
-    && chmod +x /opt/bugsinpy/framework/bin/*
-
-ENV BUGSINPY_HOME=/opt/bugsinpy 
-ENV PATH="$BUGSINPY_HOME/framework/bin:$PATH"
+# Run the setup script to install dependencies
+RUN /bin/bash -c "chmod +x /app/setup.sh \
+        && find /app/scripts -name '*.sh' -exec chmod +x {} + \
+        && SKIP_PROJECTS=true /app/setup.sh"
 
 # ── 6. Python dependencies ────────────────────────────────────────────────────
 WORKDIR /app
-
-# requirements.txt first — changes rarely, good cache layer
-COPY requirements.txt .
-RUN pip3 install --no-cache-dir -r requirements.txt
-
-# BugFarm / attention analysis packages
-RUN pip3 install --no-cache-dir \
-        ansi==0.3.6 \
-        matplotlib==3.3.4 \
-        nltk==3.6.7 \
-        numpy==1.21.6 \
-        seaborn==0.12.2 \
-        "torch==1.12.1" \
-        "transformers==4.22.2" \
-        wordninja==2.0.0
 
 # javalang fork with position info (required by method_extractor.py)
 RUN pip3 install --no-cache-dir \
         git+https://github.com/jose/javalang.git@start_position_and_end_position
 
-# source-code-tokenizer (required by bugfarm utils)
-RUN apt-get update && apt-get install -y npm \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-RUN git clone --depth 1 https://github.com/devreplay/source-code-tokenizer.git /opt/source-code-tokenizer \
-    && cd /opt/source-code-tokenizer \
-    && npm install \
-    && npm link
 
 # ── 7. Application source ─────────────────────────────────────────────────────
-COPY . /app
 
-RUN mkdir -p /app/projects /app/logs /app/data \
-    && find /app/scripts -name "*.sh" -exec chmod +x {} \; \
-    && chmod +x /app/setup.sh
+RUN mkdir -p /app/projects /app/logs /app/data 
 
 # ── 8. Entrypoint ─────────────────────────────────────────────────────────────
 RUN cat > /app/docker-entrypoint.sh <<'EOF'
@@ -126,7 +97,7 @@ bugsinpy-checkout --help &>/dev/null && echo "bugsinpy-checkout OK" || echo "bug
 # Checkout benchmark projects on first run
 if [ ! -d /app/projects/commons-cli ]; then
   echo "=== Checking out benchmark projects ==="
-  bash /app/scripts/checkout_projects.sh --root /app
+  bash /app/setup.sh --root /app
 fi
 
 exec "$@"

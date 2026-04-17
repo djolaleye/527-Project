@@ -1,4 +1,5 @@
 import javalang
+import os
 from typing import Set, Tuple
 import sys
 
@@ -59,3 +60,9 @@ def read_java(f):
 
 # file = sys.argv[1]
 # read_java(file)
+
+def discover_projects(projects_dir):
+    return sorted(
+        d for d in os.listdir(projects_dir)
+        if os.path.isdir(os.path.join(projects_dir, d))
+    )

@@ -2,8 +2,11 @@ pyyaml
 pydantic
 pytest
 pandas
+jsonlines
+openai<2
 mutpy
 radon
 unidiff
 requests
 tqdm
+scipy

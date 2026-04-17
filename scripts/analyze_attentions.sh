@@ -31,12 +31,7 @@ MODEL_SIZE=$3
 THRESHOLD=$4
 NUM_WORKERS=$5
 
-projects=(
-    "commons-cli" "commons-codec" "commons-collections" "commons-compress" "commons-csv"
-    "commons-jxpath" "commons-lang" "commons-math"
-    "gson" "jackson-core" "jackson-databind" "jackson-dataformat-xml"
-    "joda-time" "jsoup"
-)
+projects=("commons-cli" "commons-csv")
 
 for project in "${projects[@]}"; do
     python3 src/bugfarm/attention_analyzer.py \
