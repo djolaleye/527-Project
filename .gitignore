@@ -8,12 +8,10 @@ __pycache__/
 .claude/
 defects4j-repo/
 bugsinpy-repo/
-configs/
+configs.json
 *.log
 results/
 *.csv
-*.json
 *.jsonl
-model/
 *.ckpt
 mutants/
