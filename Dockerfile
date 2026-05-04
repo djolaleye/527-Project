@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y \
         dos2unix \
         unzip \
         perl cpanminus \
-        python3 python3-dev python3-pip \
+        python3.10 python3.10-dev python3.10-venv python3-pip \
         openjdk-8-jdk \
         openjdk-11-jdk \
         nodejs npm \
