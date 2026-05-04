@@ -74,7 +74,7 @@ def main(args):
             prompt =  """Observe the following java method where each statement has a specific ID starting from 0. Can you produce 3 different buggy versions of this method by changing {} only? Do not change other statements in the given java code.\n\nYou have to write each buggy method again. Do not write anything else in your response. Make sure your generated buggy java code is compilable and does not have syntax errors and compile-time errors. Do not use a variable which does not exist in the scope of the given method. You should put <start1> <start2> <start3> and <end1> <end2> <end3> in the beginning and end of each buggy method so I could parse your response later.\n\n{}""".format(change_statements_str, '\n'.join(index_code))
 
         try:
-            response = client.chat.completions.create(model="gpt-3.5-turbo", messages=[{"role": "user", "content": prompt}])
+            response = client.chat.completions.create(model="gpt-5", messages=[{"role": "user", "content": prompt}])
             dct['chatgpt_response'] = response.choices[0].message.content
         except BadRequestError as e:
             dct['chatgpt_response'] = f'Token size exceeded. {e}'

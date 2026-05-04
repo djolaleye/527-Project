@@ -13,23 +13,25 @@ The goal is to generate more comprehensive and diverse mutants while improving e
 
 ## Setup Instructions
 1. Clone the Repository
-`git clone https://github.com/djolaleye/527-Project.git`
-`cd 527-Project`
+
+    `git clone https://github.com/djolaleye/527-Project.git`
+
+    `cd 527-Project`
 
 2. Download Required Datasets and Models
 
-Download the mutant datasets (cli, csv, httpie, andible) and trained LEAM model from:
+    Download the mutant datasets (cli, csv, httpie, andible) and trained LEAM model from:
 
-https://drive.google.com/drive/folders/1JmGOXkmIJhWU1sV_YV_UD7DUXFLye3Nc?usp=sharing
+    https://drive.google.com/drive/folders/1JmGOXkmIJhWU1sV_YV_UD7DUXFLye3Nc?usp=sharing
 
-Place the downloaded contents into the appropriate directories (mutants/, model/checkpointSearch).
+    Place the downloaded contents into the appropriate directories (mutants/, model/checkpointSearch).
 
 3. Build and Run Docker Container
 
-Build the Docker image:
+    Build the Docker image:
 
-`docker build -t bl_cntr .`
+    `docker build -t bl_cntr .`
 
-Run the container:
+    Run the container:
 
-`docker run --rm -it bl_cntr bash`
+    `docker run --rm -it bl_cntr bash`
