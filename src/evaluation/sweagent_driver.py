@@ -46,10 +46,16 @@ Create exactly one realistic fault in the target project.
 Target file: {file}
 Target method (lines {start}-{end}): {method_name}
 
+Before editing anything:
+1. Read the target file so you understand the surrounding context, types, and control flow of the target method.
+2. Locate and skim the relevant test suite (e.g. files under src/test/ that exercise this class or method) so your fault is executed by existing tests.
+
+Then make the mutation.
+
 Rules:
 - Do not edit tests, build files, or configs.
 - Keep the project compiling.
-- The change should be small and bug-like, not arbitrary.
+- The change should be small and bug-like — the kind of mistake a real developer might commit (off-by-one, flipped condition, wrong operator, swapped argument, dropped null check, etc.).
 - Make exactly one edit, in the file above, inside the method indicated.
 - Output a short JSON note as the final message:
   {{"file": "...", "intent": "...", "expected_behavior_change": "..."}}
