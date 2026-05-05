@@ -10,3 +10,4 @@ unidiff
 requests
 tqdm
 scipy
+mini-swe-agent

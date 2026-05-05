@@ -19,9 +19,9 @@ function install_requirements() {
         ansi==0.3.6 \
         matplotlib==3.3.4 \
         nltk==3.6.7 \
-        numpy==1.21.6 \
+        numpy==1.23.5 \
         seaborn==0.12.2 \
-        "torch==1.12.1" \
+        "torch==1.13.1" \
         "transformers==4.22.2" \
         wordninja==2.0.0
 
@@ -31,7 +31,9 @@ function install_requirements() {
     echo "=== Setting up source-code-tokenizer ==="
     # Install the published npm package globally — it ships prebuilt lib/.
     # The GitHub clone is source-only and has no build script / tsconfig.
-    npm install -g source-code-tokenizer
+    npm uninstall -g source-code-tokenizer || true
+    rm -rf /usr/local/lib/node_modules/source-code-tokenizer
+    npm install -g source-code-tokenizer --force
 
     echo "Requirements installation completed."
 }
