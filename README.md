@@ -20,7 +20,7 @@ The goal is to generate more comprehensive and diverse mutants while improving e
 
 2. Download Required Datasets and Models
 
-    Download the mutant datasets (cli, csv, httpie, andible) and trained LEAM model from:
+    Download the mutant datasets (sweagent, BugFarm [data], LEAM [results]) and trained LEAM model from:
 
     https://drive.google.com/drive/folders/1JmGOXkmIJhWU1sV_YV_UD7DUXFLye3Nc?usp=sharing
 
@@ -35,3 +35,7 @@ The goal is to generate more comprehensive and diverse mutants while improving e
     Run the container:
 
     `docker run --rm -it bl_cntr bash`
+
+4. To use mini-swe-agent, first run `mini-extra config setup`
+
+NOTE: run PIT with "-Danimal.sniffer.skip=true"
