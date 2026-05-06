@@ -19,8 +19,8 @@ from .schema import MutantRecord, append_jsonl
 Drive mini-swe-agent to produce one mutant per run on a Defects4J subset project.
 
 Usage:
-    python -m src.evaluation.sweagent_driver --project commons-cli --n 20 --seed 0 --model gpt-5
-
+    python3 -m src.evaluation.sweagent_driver --project commons-cli --n 100 --seed 0 --model gpt-5-mini
+    python3 -m src.evaluation.sweagent_driver --project commons-csv --n 50 --seed 0 --model gpt-5-mini
 Each run:
   1. Picks a (file, method) target from mutants/results/<project>_final_all.jsonl.
   2. Copies the project to a temp worktree.

@@ -18,8 +18,8 @@ and normalize each mutant into a MutantRecord.
 PIT writes mutations.xml under target/pit-reports/<timestamp>/.
 
 Usage:
-    python -m src.evaluation.pit_collector --project commons-cli
-    python -m src.evaluation.pit_collector --project commons-cli --skip-run  # just parse
+    python3 -m src.evaluation.pit_collector --project commons-cli
+    python3 -m src.evaluation.pit_collector --project commons-cli --skip-run  # just parse
 """
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -50,6 +50,7 @@ def run_pitest(project_dir: Path) -> float:
         "org.pitest:pitest-maven:mutationCoverage",
         "-DoutputFormats=XML",
         "-DtimestampedReports=false",
+        "-Danimal.sniffer.skip=true"
         #"-DfullMutationMatrix=true",
     ]
 

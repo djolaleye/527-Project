@@ -16,7 +16,6 @@ done
 
 PROJECTS_DIR="$REPO_ROOT/projects"
 D4J_SUBSET="$REPO_ROOT/defects4j-subset"
-BSPY_SUBSET="$REPO_ROOT/bugsinpy-subset/projects"
 
 mkdir -p "$PROJECTS_DIR"
 
@@ -67,59 +66,5 @@ for entry in "$D4J_SUBSET"/*/; do
   log "Copying $d4j_project bug $bug_id (fixed) → $target"
   cp -a "$entry" "$target"
 done
-
-# ── BugsInPy checkouts ────────────────────────────────────────────────────────
-# Each project in bugsinpy-subset/projects/ may have multiple bug IDs under
-# bugs/.  Every (project, bug_id) pair is checked out to its own directory:
-#   projects/<project>-<bug_id>/
-#
-# bugsinpy-checkout places the repo at <work_dir>/<project>/, so we redirect
-# to a temp directory and then move the inner folder to the desired location.
-
-log "=== BugsInPy (Python) ==="
-
-if ! command -v bugsinpy-checkout &>/dev/null; then
-  err "'bugsinpy-checkout' not found on PATH – skipping Python checkouts."
-else
-  for proj_dir in "$BSPY_SUBSET"/*/; do
-    project="$(basename "$proj_dir")"
-    bugs_dir="$proj_dir/bugs"
-
-    if [[ ! -d "$bugs_dir" ]]; then
-      err "No bugs/ directory for $project – skipping"
-      continue
-    fi
-
-    for bug_dir in "$bugs_dir"/*/; do
-      bug_id="$(basename "$bug_dir")"
-      # Validate that the name is numeric (skip stray files)
-      if ! [[ "$bug_id" =~ ^[0-9]+$ ]]; then
-        continue
-      fi
-
-      target="$PROJECTS_DIR/${project}-${bug_id}"
-
-      if [[ -d "$target" ]]; then
-        skip "${project}-${bug_id} already exists at $target"
-        continue
-      fi
-
-      log "Checking out $project bug $bug_id (fixed) → $target"
-
-      tmpdir="$(mktemp -d)"
-      trap 'rm -rf "$tmpdir"' EXIT
-
-      if bugsinpy-checkout -p "$project" -i "$bug_id" -v 0 -w "$tmpdir"; then
-        mv "$tmpdir/$project" "$target"
-      else
-        err "bugsinpy-checkout failed for $project bug $bug_id"
-        rm -rf "$tmpdir"
-      fi
-
-      trap - EXIT
-      rm -rf "$tmpdir"
-    done
-  done
-fi
 
 log "=== Done. Checked-out projects are in $PROJECTS_DIR ==="

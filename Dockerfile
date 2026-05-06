@@ -55,15 +55,30 @@ RUN cpanm --quiet --notest \
         XML::Simple \
         XML::Parser \
         Storable
-# requirements.txt first — changes rarely, good cache layer
+
 COPY requirements.txt .
 COPY . /app
 
-# Expose bugsinpy CLI tools (bugsinpy-checkout, etc.) on PATH
-ENV PATH=/app/bugsinpy-repo/framework/bin:${PATH}
-RUN find /app/bugsinpy-repo/framework/bin -type f -exec chmod +x {} + \
-    && find /app/bugsinpy-repo/framework -type f \( -name '*.sh' -o -name 'bugsinpy-*' \) \
-        -exec dos2unix {} +
+
+RUN git clone https://github.com/rjust/defects4j.git /opt/defects4j \
+    && cd /opt/defects4j \
+    && cpanm --installdeps . \
+    && ./init.sh
+
+ENV PATH="/opt/defects4j/framework/bin:${PATH}"
+
+RUN mkdir -p /app/defects4j-subset \
+    && if [ ! -d /app/defects4j-subset/Cli-40f ]; then \
+         defects4j checkout -p Cli -v 40f -w /app/defects4j-subset/Cli-40f; \
+       fi \
+    && if [ ! -d /app/defects4j-subset/Csv-16f ]; then \
+         defects4j checkout -p Csv -v 16f -w /app/defects4j-subset/Csv-16f; \
+       fi \
+    && cp /app/scripts/defects4j-subset/Cli-40f/pom.xml /app/defects4j-subset/Cli-40f/pom.xml \
+    && cp /app/scripts/defects4j-subset/Csv-16f/pom.xml /app/defects4j-subset/Csv-16f/pom.xml
+
+RUN find /app -type f -exec grep -Iq . {} \; -exec dos2unix {} \;
+
 
 # Run the setup script to install dependencies
 RUN /bin/bash -c "chmod +x /app/setup.sh \
@@ -92,7 +107,6 @@ mvn --version
 echo "Java 8:";  "$JAVA_8_HOME/bin/java"  -version 2>&1
 echo "Java 11:"; "$JAVA_11_HOME/bin/java" -version 2>&1
 command -v defects4j >/dev/null && echo "defects4j OK" || echo "defects4j not found on PATH"
-bugsinpy-checkout --help &>/dev/null && echo "bugsinpy-checkout OK" || echo "bugsinpy-checkout not found on PATH"
 
 # Checkout benchmark projects on first run
 if [ ! -d /app/projects/commons-cli ]; then

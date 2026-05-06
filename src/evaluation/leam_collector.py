@@ -17,7 +17,8 @@ LEAM entries:
   - target == 0 : mutant method body
 
 Usage:
-    python -m src.evaluation.leam_collector --project commons-cli
+    python3 -m src.evaluation.leam_collector --project commons-cli
+    python3 -m src.evaluation.leam_collector --project commons-csv
 """
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
